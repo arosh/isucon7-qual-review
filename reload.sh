@@ -11,6 +11,12 @@ if [ -e conf/nginx.conf ]; then
   cp conf/nginx.conf /etc/nginx/nginx.conf
 fi
 
+# Python
+if [ -e conf/isubata.python.service ]; then
+  cp conf/isubata.python.service /etc/systemd/system/isubata.python.service
+fi
+
 systemctl daemon-reload
 systemctl reload nginx
-journalctl -f -u nginx
+systemctl restart mysql isubata.python
+journalctl -f -u nginx -u isubata.python

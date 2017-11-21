@@ -13,7 +13,7 @@ import time
 
 static_folder = pathlib.Path(__file__).resolve().parent.parent / 'public'
 icons_folder = static_folder / 'icons'
-app = flask.Flask(__name__, static_folder=str(static_folder), static_url_path='')
+app = flask.Flask(__name__)
 app.secret_key = 'tonymoris'
 avatar_max_size = 1 * 1024 * 1024
 
@@ -392,6 +392,8 @@ def get_icon(file_name):
     row = cur.fetchone()
     ext = os.path.splitext(file_name)[1] if '.' in file_name else ''
     mime = ext2mime(ext)
+    with open(str(icons_folder / file_name), 'wb') as f:
+        f.write(row['data'])
     if row and mime:
         return flask.Response(row['data'], mimetype=mime)
     flask.abort(404)
