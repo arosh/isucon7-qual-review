@@ -30,30 +30,24 @@ config = {
     'db_password': os.environ.get('ISUBATA_DB_PASSWORD', ''),
 }
 
+_db = None
 
 def dbh():
-    if hasattr(flask.g, 'db'):
-        return flask.g.db
-
-    flask.g.db = MySQLdb.connect(
-        host   = config['db_host'],
-        port   = config['db_port'],
-        user   = config['db_user'],
-        passwd = config['db_password'],
-        db     = 'isubata',
-        charset= 'utf8mb4',
-        cursorclass= MySQLdb.cursors.DictCursor,
-        autocommit = True,
-    )
-    cur = flask.g.db.cursor()
-    cur.execute("SET SESSION sql_mode='TRADITIONAL,NO_AUTO_VALUE_ON_ZERO,ONLY_FULL_GROUP_BY'")
-    return flask.g.db
-
-
-@app.teardown_appcontext
-def teardown(error):
-    if hasattr(flask.g, "db"):
-        flask.g.db.close()
+    global _db
+    if _db is None:
+        _db = MySQLdb.connect(
+            host   = config['db_host'],
+            port   = config['db_port'],
+            user   = config['db_user'],
+            passwd = config['db_password'],
+            db     = 'isubata',
+            charset= 'utf8mb4',
+            cursorclass= MySQLdb.cursors.DictCursor,
+            autocommit = True,
+        )
+        cur = _db.cursor()
+        cur.execute("SET SESSION sql_mode='TRADITIONAL,NO_AUTO_VALUE_ON_ZERO,ONLY_FULL_GROUP_BY'")
+    return _db
 
 
 @app.route('/initialize')
