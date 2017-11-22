@@ -17,6 +17,9 @@ app = flask.Flask(__name__)
 app.secret_key = 'tonymoris'
 avatar_max_size = 1 * 1024 * 1024
 
+#from werkzeug.contrib.profiler import ProfilerMiddleware
+#app.wsgi_app = ProfilerMiddleware(app.wsgi_app, profile_dir="/tmp/profile")
+
 if not os.path.exists(str(icons_folder)):
     os.makedirs(str(icons_folder))
 
@@ -240,8 +243,6 @@ def fetch_unread():
     user_id = flask.session.get('user_id')
     if not user_id:
         flask.abort(403)
-
-    time.sleep(1.0)
 
     cur = dbh().cursor()
     sql = '''
