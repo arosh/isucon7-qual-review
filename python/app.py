@@ -230,23 +230,16 @@ def fetch_unread():
     time.sleep(1.0)
 
     cur = dbh().cursor()
-    cur.execute('SELECT id FROM channel')
-    rows = cur.fetchall()
-    channel_ids = [row['id'] for row in rows]
-
-    res = []
-    for channel_id in channel_ids:
-        cur.execute('SELECT * FROM haveread WHERE user_id = %s AND channel_id = %s', (user_id, channel_id))
-        row = cur.fetchone()
-        if row:
-            cur.execute('SELECT COUNT(*) as cnt FROM message WHERE channel_id = %s AND %s < id',
-                        (channel_id, row['message_id']))
-        else:
-            cur.execute('SELECT COUNT(*) as cnt FROM message WHERE channel_id = %s', (channel_id,))
-        r = {}
-        r['channel_id'] = channel_id
-        r['unread'] = int(cur.fetchone()['cnt'])
-        res.append(r)
+    sql = '''
+    SELECT
+        channel.id AS channel_id,
+        (SELECT COUNT(*) FROM message WHERE message.channel_id = channel.id AND message.id > IFNULL(haveread.message_id, 0)) AS unread
+    FROM channel
+    LEFT JOIN haveread ON haveread.channel_id = channel.id
+    WHERE haveread.user_id = %s;
+    '''
+    cur.execute(sql, (user_id, ))
+    res = cur.fetchall()
     return flask.jsonify(res)
 
 
@@ -393,7 +386,7 @@ def get_icon(file_name):
     filename = str(icons_folder / file_name)
     with open(filename, 'wb') as f:
         f.write(row['data'])
-    return flask.send_file(filename)
+    return flask.send_file(filename, add_etags=False)
 
 
 if __name__ == "__main__":
