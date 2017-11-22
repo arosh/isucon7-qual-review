@@ -10,6 +10,7 @@ import string
 import tempfile
 import time
 
+import ujson
 
 static_folder = pathlib.Path(__file__).resolve().parent.parent / 'public'
 icons_folder = static_folder / 'icons'
@@ -229,7 +230,7 @@ def get_message():
                 ' ON DUPLICATE KEY UPDATE message_id = %s, updated_at = NOW()',
                 (user_id, channel_id, max_message_id, max_message_id))
 
-    return flask.jsonify(response)
+    return ujson.dumps(response)
 
 
 @app.route('/fetch')
@@ -249,7 +250,7 @@ def fetch_unread():
     '''
     cur.execute(sql, (user_id, ))
     res = cur.fetchall()
-    return flask.jsonify(res)
+    return ujson.dumps(res)
 
 
 @app.route('/history/<int:channel_id>')
