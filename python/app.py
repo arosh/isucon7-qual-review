@@ -198,15 +198,29 @@ def get_message():
     channel_id = int(flask.request.args.get('channel_id'))
     last_message_id = int(flask.request.args.get('last_message_id'))
     cur = dbh().cursor()
-    cur.execute("SELECT * FROM message WHERE id > %s AND channel_id = %s ORDER BY id DESC LIMIT 100",
-                (last_message_id, channel_id))
+    sql = '''
+    SELECT
+        message.id AS id,
+        message.created_at AS created_at,
+        message.content AS content,
+        user.name AS user_name,
+        user.display_name AS user_display_name,
+        user.avatar_icon AS user_avatar_icon
+    FROM message
+    JOIN user ON user.id = message.user_id
+    WHERE message.channel_id = %s AND message.id > %s
+    ORDER BY message.id DESC LIMIT 100
+    '''
+    cur.execute(sql, (channel_id, last_message_id))
     rows = cur.fetchall()
     response = []
     for row in rows:
         r = {}
         r['id'] = row['id']
-        cur.execute("SELECT name, display_name, avatar_icon FROM user WHERE id = %s", (row['user_id'],))
-        r['user'] = cur.fetchone()
+        r['user'] = {
+            'name': row['user_name'],
+            'display_name': row['user_display_name'],
+            'avatar_icon': row['user_avatar_icon']}
         r['date'] = row['created_at'].strftime("%Y/%m/%d %H:%M:%S")
         r['content'] = row['content']
         response.append(r)
