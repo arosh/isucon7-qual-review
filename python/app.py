@@ -378,16 +378,6 @@ def post_profile():
     return flask.redirect('/', 303)
 
 
-def ext2mime(ext):
-    if ext in ('.jpg', '.jpeg'):
-        return 'image/jpeg'
-    if ext == '.png':
-        return 'image/png'
-    if ext == '.gif':
-        return 'image/gif'
-    return ''
-
-
 @app.route('/icons/<file_name>')
 def get_icon(file_name):
     cur = dbh().cursor()
