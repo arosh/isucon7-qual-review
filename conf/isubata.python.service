@@ -5,7 +5,7 @@ Description = isucon7 qualifier main application in python
 WorkingDirectory=/home/isucon/isubata/webapp/python
 EnvironmentFile=/home/isucon/env.sh
 
-ExecStart = /home/isucon/local/python/bin/gunicorn -w 2 -b 'unix:/dev/shm/app.sock' app:app
+ExecStart = /home/isucon/local/python/bin/gunicorn -w 1 -b :5000 app:app
 
 Restart   = always
 Type      = simple
